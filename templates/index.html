@@ -3,13 +3,37 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Leitor de QR Code</title>
+    <title>Leitura de QR Code e Scraping</title>
+    <!-- Link para o arquivo CSS -->
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
 </head>
 <body>
-    <h1>Leitor de QR Code</h1>
-    <form action="/ler_qrcode" method="post" enctype="multipart/form-data">
-        <input type="file" name="file" accept="image/*" capture="camera">
-        <button type="submit">Enviar</button>
+    <h1>Economi$ee</h1>
+
+    <!-- Exibe a mensagem de sucesso ou erro após o processamento do QR Code -->
+    {% if message %}
+        <p>{{ message }}</p>
+    {% endif %}
+
+    <!-- Formulário de upload -->
+    <form method="POST" enctype="multipart/form-data">
+        <label for="file">Escolha a imagem do QR Code:</label>
+        <input type="file" id="file" name="file" accept="image/*" required>
+        <button type="submit">Processar QR Code</button>
     </form>
+
+    <!-- Botão para "Ler mais um código" -->
+    {% if message %}
+        <br><br>
+        <button onclick="resetForm()">Ler mais um código</button>
+    {% endif %}
+
+    <script>
+        function resetForm() {
+            // Limpa o campo de arquivo e recarrega o formulário
+            document.getElementById('file').value = ''; 
+            window.location.reload();  // Recarrega a página para limpar a mensagem e formulário
+        }
+    </script>
 </body>
 </html>

@@ -1,0 +1,7 @@
+Flask==2.2.3
+pyzbar==0.1.8
+Pillow==9.3.0
+pandas==1.5.3
+selenium==4.9.0
+webdriver-manager==4.8.0
+beautifulsoup4==4.11.1
