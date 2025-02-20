@@ -4,35 +4,44 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Leitura de QR Code e Scraping</title>
-    <!-- Link para o arquivo CSS -->
     <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
 </head>
 <body>
     <h1>Economi$ee</h1>
 
-    <!-- Exibe a mensagem de sucesso ou erro após o processamento do QR Code -->
     {% if message %}
         <p>{{ message }}</p>
     {% endif %}
 
-    <!-- Formulário de upload -->
     <form method="POST" enctype="multipart/form-data">
         <label for="file">Escolha a imagem do QR Code:</label>
         <input type="file" id="file" name="file" accept="image/*" required>
         <button type="submit">Processar QR Code</button>
     </form>
 
-    <!-- Botão para "Ler mais um código" -->
     {% if message %}
         <br><br>
-        <button onclick="resetForm()">Ler mais um código</button>
+        <button onclick="resetForm()">Ler outro código</button>
     {% endif %}
+
+    <!-- Formulário de Reset de Dados (discreto) -->
+    <form method="POST" action="{{ url_for('reset_data') }}" style="display:none;">
+        <button type="submit" class="btn-reset">Resetar Dados</button>
+    </form>
+
+    <!-- Botão Discreto para Resetar os Dados -->
+    <button onclick="document.forms[0].submit()" style="position: absolute; top: 10px; right: 10px; background-color: #ff6666; color: white; border: none; padding: 10px; border-radius: 5px;">Resetar Dados</button>
+
+    <br><br>
+    <!-- Link para acessar a página de pesquisa -->
+    <a href="{{ url_for('pesquisa') }}" style="display: inline-block; background-color: #4CAF50; color: white; padding: 10px 20px; border: none; border-radius: 5px; text-decoration: none; text-align: center;">
+        Ir para a Pesquisa
+    </a>
 
     <script>
         function resetForm() {
-            // Limpa o campo de arquivo e recarrega o formulário
-            document.getElementById('file').value = ''; 
-            window.location.reload();  // Recarrega a página para limpar a mensagem e formulário
+            document.getElementById('file').value = '';
+            window.location.reload();
         }
     </script>
 </body>

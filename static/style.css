@@ -1,65 +1,70 @@
-/* Define o estilo geral da página */
 body {
     font-family: Arial, sans-serif;
-    background-color: #d0f5d0; /* Fundo verde claro */
-    color: white; /* Texto branco */
+    background-color: #f4f4f4;
     margin: 0;
     padding: 0;
     text-align: center;
 }
 
-/* Cabeçalho da página */
-h1 {
-    color: #ffffff;
-    margin-top: 30px;
-    font-size: 2.5em;
-}
-
-/* Estilo do formulário */
-form {
-    margin-top: 20px;
+.container {
+    max-width: 800px;
+    margin: 50px auto;
     padding: 20px;
-    background-color: #4CAF50; /* Fundo verde */
-    border-radius: 10px;
-    display: inline-block;
+    background-color: white;
+    border-radius: 8px;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
 }
 
-/* Estilo dos campos de input e botão */
+h1 {
+    font-size: 2.5rem;
+    color: #333;
+}
+
+form {
+    margin-bottom: 20px;
+}
+
 input[type="file"] {
     padding: 10px;
-    font-size: 1em;
-    border-radius: 5px;
-    border: none;
-    margin-top: 10px;
+    font-size: 16px;
+    margin-right: 10px;
 }
 
 button {
     padding: 10px 20px;
-    background-color: #45a049; /* Verde escuro */
+    background-color: #007bff;
     border: none;
     color: white;
-    font-size: 1.2em;
-    cursor: pointer;
+    font-size: 16px;
     border-radius: 5px;
-    margin-top: 15px;
+    cursor: pointer;
 }
 
 button:hover {
-    background-color: #3e8e41; /* Alterar para um verde mais escuro no hover */
+    background-color: #0056b3;
 }
 
-/* Estilo do botão de "Ler mais um código" */
-button:focus {
-    outline: none;
-}
-
-/* Mensagem de sucesso */
-p {
-    font-size: 1.2em;
-    color: #ffffff;
-    background-color: #4CAF50;
+input[type="text"] {
     padding: 10px;
+    font-size: 16px;
+    margin-right: 10px;
     border-radius: 5px;
-    display: inline-block;
+    border: 1px solid #ccc;
+    width: 60%;
+}
+
+.resultados table {
+    width: 100%;
+    border-collapse: collapse;
     margin-top: 20px;
+}
+
+.resultados th, .resultados td {
+    padding: 10px;
+    border: 1px solid #ddd;
+    text-align: left;
+}
+
+.resultados th {
+    background-color: #f1f1f1;
 }

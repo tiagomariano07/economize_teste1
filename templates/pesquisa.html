@@ -1,0 +1,157 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Pesquisa de Produtos</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+
+    <style>
+        /* Estilos gerais para a página */
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 0;
+            display: flex;
+            justify-content: center;
+            align-items: flex-start; /* Alinha o conteúdo ao topo */
+            background-color: #f9f9f9;
+        }
+
+        .container {
+            width: 95%; /* Tamanho ajustado da área */
+            max-width: 1200px;
+            padding: 30px;
+            background-color: white;
+            box-shadow: 0px 4px 6px rgba(0, 0, 0, 0.1);
+            margin-top: 20px;
+            border-radius: 8px;
+        }
+
+        h2 {
+            color: #4CAF50;
+            text-align: center;
+        }
+
+        /* Campo de pesquisa */
+        input[type="text"] {
+            padding: 8px;
+            width: 70%;
+            margin-top: 20px;
+            border: 1px solid #ccc;
+            border-radius: 5px;
+            display: block;
+            margin-left: auto;
+            margin-right: auto;
+        }
+
+        .search-btn {
+            padding: 8px 15px;
+            background-color: #4CAF50;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            margin-top: 10px;
+        }
+
+        .search-btn:hover {
+            background-color: #45a049;
+        }
+
+        .reset-btn {
+            background-color: #f44336;
+            padding: 8px 15px;
+            margin-top: 10px;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+        }
+
+        .reset-btn:hover {
+            background-color: #d32f2f;
+        }
+
+        /* Estilos para a tabela */
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 20px;
+        }
+
+        table th, table td {
+            padding: 12px;
+            text-align: left;
+            border-bottom: 1px solid #ddd;
+        }
+
+        table th {
+            background-color: #4CAF50;
+            color: white;
+            position: sticky;
+            top: 0;
+            z-index: 10;  /* Garante que o cabeçalho fique visível ao rolar */
+        }
+
+        /* Responsividade */
+        @media screen and (max-width: 768px) {
+            table th, table td {
+                font-size: 12px;
+            }
+            input[type="text"] {
+                width: 100%;  /* O campo de pesquisa vai ocupar toda a largura */
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h2>Pesquisa de Produtos</h2>
+
+        <br>
+        <a href="{{ url_for('index') }}" class="search-btn">Voltar para home</a>
+
+        <!-- Campo de Pesquisa -->
+        <form method="POST">
+            <input type="text" name="pesquisa" placeholder="Digite o nome do produto" value="{{ request.form.get('pesquisa', '') }}">
+            <button type="submit" class="search-btn">Buscar</button>
+        </form>
+
+
+
+        <!-- Exibe a tabela de resultados -->
+        {% if data %}
+            <table>
+                <thead>
+                    <tr>
+                        <th>Produto</th>
+                        <th>Preço</th>
+                        <th>Estabelecimento</th>
+                        <th>Endereço</th> <!-- Adicionando a coluna de Endereço -->
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for item in data %}
+                        <tr>
+                            <td>{{ item[0] }}</td>
+                            <td>{{ item[1] }}</td>
+                            <td>{{ item[2] }}</td>
+                            <td>{{ item[3] }}</td> <!-- Exibindo o Endereço -->
+                        </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        {% else %}
+            <p>Nenhum produto encontrado.</p>
+        {% endif %}
+
+        
+
+        <!-- Botão para resetar os dados -->
+        <form method="POST" action="{{ url_for('reset_data') }}">
+            <button type="submit" class="reset-btn">Resetar Dados</button>
+        </form>
+    </div>
+</body>
+</html>

@@ -1,25 +1,46 @@
-from flask import Flask, render_template, request, redirect, url_for
+from flask import Flask, render_template, request, jsonify, redirect, url_for
+import json
+import os
 from pyzbar.pyzbar import decode
 from PIL import Image
-import re
-import os
-import pandas as pd
 from selenium import webdriver
 from selenium.webdriver.chrome.service import Service
 from selenium.webdriver.chrome.options import Options
 from webdriver_manager.chrome import ChromeDriverManager
-from bs4 import BeautifulSoup
-from time import sleep
 from selenium.webdriver.support.ui import WebDriverWait
 from selenium.webdriver.support import expected_conditions as EC
 from selenium.webdriver.common.by import By
+from bs4 import BeautifulSoup
 
 app = Flask(__name__)
+
+# Função para salvar os dados extraídos de forma acumulativa e sem duplicação
+def save_data_accumulative(new_data):
+    # Verifica se o arquivo JSON já existe
+    if os.path.exists('dados_extraidos.json'):
+        # Se o arquivo já existe, lê os dados existentes
+        with open('dados_extraidos.json', 'r') as f:
+            existing_data = json.load(f)
+    else:
+        # Caso o arquivo não exista, inicia uma lista vazia
+        existing_data = []
+
+    # Remove duplicatas, mantendo apenas os valores únicos
+    existing_data_set = set(tuple(item) for item in existing_data)
+    new_data_set = set(tuple(item) for item in new_data)
+
+    # Une os dados existentes com os novos dados, sem duplicatas
+    all_data = list(existing_data_set.union(new_data_set))
+
+    # Salva os dados acumulados no arquivo JSON
+    with open('dados_extraidos.json', 'w') as f:
+        json.dump(all_data, f)
 
 @app.route('/', methods=['GET', 'POST'])
 def index():
     message = ""
-    
+    extracted_data = []
+
     if request.method == 'POST' and 'file' in request.files:
         # Recebe a imagem do QR Code
         file = request.files['file']
@@ -64,66 +85,73 @@ def index():
             # Processa o HTML com BeautifulSoup
             soup = BeautifulSoup(html, 'html.parser')
 
-            # Obtém os dados principais da nota fiscal
-            try:
-                nome_estabelecimento = soup.find('div', id='u20').get_text(strip=True)
-            except AttributeError:
-                nome_estabelecimento = "Não encontrado"
-
-            # Nome da aba com o nome do estabelecimento (removendo caracteres inválidos)
-            sheet_name = re.sub(r'[\/:*?"<>|]', '', nome_estabelecimento)[:31]  # Excel aceita até 31 caracteres
-
             # Buscar todas as linhas de produtos na tabela
             linhas = soup.find_all('tr', id=True)
 
-            # Lista para armazenar os dados extraídos
             dados_extraidos = []
 
-            # Itera sobre as linhas da tabela e extrai os dados das colunas
+            # Encontrar todas as divs com a classe 'text'
+            text_divs = soup.find_all('div', class_='text')
+
+            # Itera sobre as linhas da tabela e extrai os dados
             for linha in linhas:
-                # Garantir que o nome do estabelecimento seja atribuído a cada linha (caso não seja encontrado, usa o nome geral)
-                nome_estabelecimento_item = soup.find('div', id='u20').get_text(strip=True) if linha.find('div', id='u20') else nome_estabelecimento
+                # Busca o nome do estabelecimento (fora do loop, pois é um único valor)
+                nome_estabelecimento_item = soup.find('div', id='u20').get_text(strip=True) if soup.find('div', id='u20') else 'Não encontrado'
                 
-                txtTit2 = linha.find('span', class_='txtTit2').get_text(strip=True) if linha.find('span', class_='txtTit2') else ''
-                Rcod = linha.find('span', class_='RCod').get_text(strip=True).replace("Código: ", "")
-                Rcod = re.sub(r'[()]', '', Rcod)  # Remove os parênteses
-                RUN = linha.find('span', class_='RUN').get_text(strip=True).replace("UN: ", "") if linha.find('span', class_='RUN') else ''
-                Rvlunit = linha.find('span', class_='RvlUnit').get_text(strip=True).replace("Vl. Unit.:", "") if linha.find('span', class_='RvlUnit') else ''
+                # Extrair o valor do produto
+                descricao_item = linha.find('span', class_='txtTit2').get_text(strip=True) if linha.find('span', class_='txtTit2') else ''
                 
-                cnpj = soup.find('div', class_='text').get_text(strip=True).replace("CNPJ:", "").strip()
-                cnpj = re.sub(r'\D', '', cnpj)  # Remove tudo que não for número
-                divs = soup.find_all('div', class_='text')
-                endereco = divs[1].get_text(strip=True)
-                data_emissao = soup.find('strong', string=lambda text: 'Emissão:' in text).next_sibling.strip()
-                data_emissao = re.match(r'\d{2}/\d{2}/\d{4}', data_emissao).group()
+                # Extrair o valor unitário
+                valor_unit = linha.find('span', class_='RvlUnit').get_text(strip=True).replace("Vl. Unit.:", "") if linha.find('span', class_='RvlUnit') else ''
                 
-                # Adiciona os dados extraídos na lista
-                dados_extraidos.append([txtTit2, Rcod, RUN, Rvlunit, nome_estabelecimento_item, cnpj, endereco, data_emissao])
+                # Extrair o endereço (fora do loop, pois é uma informação fixa)
+                endereco = soup.find('div', class_='text').get_text(strip=True) if soup.find('div', class_='text') else 'Endereço não encontrado'
 
-            # Cria um DataFrame com os dados extraídos
-            df_novo = pd.DataFrame(dados_extraidos, columns=['Produto', 'Código', 'Unidade', 'Valor Unitário', 'Nome Estabelecimento','CNPJ', 'Endereço', 'Data Emissão'])
+                for i, div in enumerate(text_divs):
+                    if "CNPJ" in div.get_text():  # Se encontrar o CNPJ
+                        if i + 1 < len(text_divs):  # Se houver um próximo div (o endereço)
+                            endereco = text_divs[i + 1].get_text(strip=True)
+                            endereco = endereco.replace(", ,", "-")
+                        break
 
-            # Nome do arquivo Excel
-            arquivo_excel = "conteudo_estruturado_site.xlsx"
+                # Adiciona os dados extraídos à lista
+                dados_extraidos.append([descricao_item, valor_unit, nome_estabelecimento_item, endereco])
 
-            # Verificar se o arquivo já existe
-            if os.path.exists(arquivo_excel):
-                # Abrir o arquivo para adicionar a nova aba, substituindo a aba existente se necessário
-                with pd.ExcelWriter(arquivo_excel, mode="a", engine="openpyxl", if_sheet_exists="replace") as writer:
-                    # Cria a nova aba ou sobrescreve se já existir
-                    df_novo.to_excel(writer, sheet_name=sheet_name, index=False)
+            extracted_data = dados_extraidos
 
-            else:
-                # Criar um novo arquivo com a aba correspondente
-                with pd.ExcelWriter(arquivo_excel, mode="w", engine="openpyxl") as writer:
-                    df_novo.to_excel(writer, sheet_name=sheet_name, index=False)
+            # Salvar os dados extraídos em um arquivo JSON sem duplicações
+            save_data_accumulative(extracted_data)
 
-            message = f"Dados salvos na aba '{sheet_name}' do arquivo '{arquivo_excel}' com sucesso!"
+            message = "Dados salvos com sucesso!"
     
     return render_template('index.html', message=message)
+
+@app.route('/pesquisa', methods=['GET', 'POST'])
+def pesquisa():
+    # Carregar os dados do arquivo JSON
+    with open('dados_extraidos.json', 'r') as f:
+        extracted_data = json.load(f)
+
+    # Filtrar os itens com base na pesquisa do usuário
+    pesquisa = request.form.get('pesquisa', '').lower()
+
+    # Se houver pesquisa, filtre os dados
+    if pesquisa:
+        filtered_data = [item for item in extracted_data if pesquisa in item[0].lower()]  # Filtra pela descrição do produto
+    else:
+        filtered_data = extracted_data
+
+    return render_template('pesquisa.html', data=filtered_data)
+
+
+@app.route('/reset', methods=['POST'])
+def reset_data():
+    # Apagar o conteúdo do arquivo JSON
+    with open('dados_extraidos.json', 'w') as f:
+        json.dump([], f)  # Escreve uma lista vazia no arquivo
+
+    return redirect(url_for('pesquisa'))  # Redireciona para a página de pesquisa
 
 
 if __name__ == '__main__':
     app.run(host='0.0.0.0', port=5000, debug=True)
-
- 
