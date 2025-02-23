@@ -3,34 +3,51 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Leitura de QR Code e Scraping</title>
+    <title>Economizee</title>
     <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+    <style>
+        /* Estilos para o cabeçalho */
+        header {
+            display: flex;
+            align-items: center;  /* Alinha a imagem verticalmente */
+            justify-content: center; /* Garante que a imagem ficará à esquerda */
+            padding: 10px;
+            background-color: #f8f9fa; /* Cor de fundo do cabeçalho */
+        }
+
+        header img {
+            width: 200px;  /* Ajuste o tamanho da imagem conforme necessário */
+            height: auto;  /* Mantém a proporção da imagem */
+            margin-right: 15px;  /* Espaço à direita da imagem */
+        }
+
+        header h1 {
+            font-size: 24px;
+        }
+    </style>
+
+    <header>
+        <img class = "imagem" src="{{ url_for('static', filename='economizee.jpg') }}" alt="Logo">
+    </header>
+
 </head>
 <body>
-    <h1>Economi$ee</h1>
+    <h1>Economizee!</h1>
 
     {% if message %}
         <p>{{ message }}</p>
     {% endif %}
 
     <form method="POST" enctype="multipart/form-data">
-        <label for="file">Escolha a imagem do QR Code:</label>
-        <input type="file" id="file" name="file" accept="image/*" required>
-        <button type="submit">Processar QR Code</button>
+        <label for="file">Escolha o arquivo QR Code:</label>
+        <input type="file" id="file" name="file" accept="image/*">
+        <button type="submit">Processar Dados</button>
     </form>
 
     {% if message %}
-        <br><br>
-        <button onclick="resetForm()">Ler outro código</button>
+        <p>{{ message }}</p>
+        <button onclick="window.location.reload()">Ler outro código</button>
     {% endif %}
-
-    <!-- Formulário de Reset de Dados (discreto) -->
-    <form method="POST" action="{{ url_for('reset_data') }}" style="display:none;">
-        <button type="submit" class="btn-reset">Resetar Dados</button>
-    </form>
-
-    <!-- Botão Discreto para Resetar os Dados -->
-    <button onclick="document.forms[0].submit()" style="position: absolute; top: 10px; right: 10px; background-color: #ff6666; color: white; border: none; padding: 10px; border-radius: 5px;">Resetar Dados</button>
 
     <br><br>
     <!-- Link para acessar a página de pesquisa -->
@@ -39,10 +56,7 @@
     </a>
 
     <script>
-        function resetForm() {
-            document.getElementById('file').value = '';
-            window.location.reload();
-        }
+        document.getElementById('file_input_div').style.display = 'block';
     </script>
 </body>
 </html>

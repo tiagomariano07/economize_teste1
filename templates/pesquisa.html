@@ -56,21 +56,18 @@
         }
 
         .search-btn:hover {
-            background-color: #45a049;
+            background-color: #18bb85;
         }
 
         .reset-btn {
             background-color: #f44336;
             padding: 8px 15px;
+            text-align: right;
             margin-top: 10px;
             color: white;
             border: none;
             border-radius: 5px;
             cursor: pointer;
-        }
-
-        .reset-btn:hover {
-            background-color: #d32f2f;
         }
 
         /* Estilos para a tabela */
@@ -104,21 +101,28 @@
             }
         }
     </style>
+
+
+
 </head>
+
+
 <body>
     <div class="container">
         <h2>Pesquisa de Produtos</h2>
-
         <br>
-        <a href="{{ url_for('index') }}" class="search-btn">Voltar para home</a>
+        <a href="{{ url_for('index') }}" class="search-btn">Voltar para página inicial</a>
 
         <!-- Campo de Pesquisa -->
         <form method="POST">
-            <input type="text" name="pesquisa" placeholder="Digite o nome do produto" value="{{ request.form.get('pesquisa', '') }}">
-            <button type="submit" class="search-btn">Buscar</button>
+            <input type="text" name="pesquisa" placeholder="Digite a descrição do produto" value="{{ request.form.get('pesquisa', '') }}">
+            <button type="submit" class="search-btn">Buscar</button>            
         </form>
-
-
+            <div class="botao_reset">
+                <form method="POST" action="{{ url_for('reset_data') }}">
+                <button type="submit" class="reset-btn">Resetar Dados</button>
+            </div>    
+        </form>
 
         <!-- Exibe a tabela de resultados -->
         {% if data %}
@@ -127,8 +131,9 @@
                     <tr>
                         <th>Produto</th>
                         <th>Preço</th>
+                        <th>Data</th>
                         <th>Estabelecimento</th>
-                        <th>Endereço</th> <!-- Adicionando a coluna de Endereço -->
+                        <th>Endereço</th> 
                     </tr>
                 </thead>
                 <tbody>
@@ -137,7 +142,8 @@
                             <td>{{ item[0] }}</td>
                             <td>{{ item[1] }}</td>
                             <td>{{ item[2] }}</td>
-                            <td>{{ item[3] }}</td> <!-- Exibindo o Endereço -->
+                            <td>{{ item[3] }}</td>
+                            <td>{{ item[4] }}</td> 
                         </tr>
                     {% endfor %}
                 </tbody>
@@ -146,12 +152,6 @@
             <p>Nenhum produto encontrado.</p>
         {% endif %}
 
-        
-
-        <!-- Botão para resetar os dados -->
-        <form method="POST" action="{{ url_for('reset_data') }}">
-            <button type="submit" class="reset-btn">Resetar Dados</button>
-        </form>
     </div>
 </body>
 </html>
