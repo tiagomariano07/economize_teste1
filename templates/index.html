@@ -42,6 +42,8 @@
         <label for="file">Escolha o arquivo QR Code:</label>
         <input type="file" id="file" name="file" accept="image/*">
         <button type="submit">Processar Dados</button>
+        <a href="{{ url_for('pesquisa') }}" style="display: inline-block; background-color: #4CAF50; color: white; padding: 10px 20px; border: none; border-radius: 5px; text-decoration: none; text-align: center;">
+            Ir para a Pesquisa
     </form>
 
     {% if message %}
@@ -51,9 +53,20 @@
 
     <br><br>
     <!-- Link para acessar a página de pesquisa -->
-    <a href="{{ url_for('pesquisa') }}" style="display: inline-block; background-color: #4CAF50; color: white; padding: 10px 20px; border: none; border-radius: 5px; text-decoration: none; text-align: center;">
-        Ir para a Pesquisa
+
     </a>
+    <a href="{{ url_for('login') }}" style="display: inline-block; background-color: #4CAF50; color: white; padding: 10px 20px; border: none; border-radius: 5px; text-decoration: none; text-align: center;">
+        Login
+    </a>
+
+    <a href="{{ url_for('registro') }}" style="display: inline-block; background-color: #4CAF50; color: white; padding: 10px 20px; border: none; border-radius: 5px; text-decoration: none; text-align: center;">
+        Fazer registro de usuário
+    </a>
+
+    <a href="{{ url_for('personalizado') }}" style="display: inline-block; background-color: #4CAF50; color: white; padding: 10px 20px; border: none; border-radius: 5px; text-decoration: none; text-align: center;">
+        Uso personalizado
+    </a>
+
 
     <script>
         document.getElementById('file_input_div').style.display = 'block';

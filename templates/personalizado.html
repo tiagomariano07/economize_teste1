@@ -1,0 +1,37 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Minha Página Personalizada</title>
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css">
+</head>
+<body>
+    <div class="container">
+        <h1>Bem-vindo, {{ nome_usuario }}!</h1>
+
+        <h2>Suas Compras:</h2>
+        <table border="1">
+            <tr>
+                <th>ID da Compra</th>
+                <th>Descrição</th>
+                <th>Data</th>
+            </tr>
+            {% for compra in compras %}
+            <tr>
+                <td>{{ compra.id_compra }}</td>
+                <td>{{ compra.descricao }}</td>
+                <td>{{ compra.data }}</td>
+            </tr>
+            {% endfor %}
+        </table>
+                </tbody>
+            </table>
+        {% else %}
+            <p>Você ainda não fez nenhuma compra.</p>
+        {% endif %}
+        
+        <a href="{{ url_for('index') }}" class="btn btn-primary">Voltar à Página Inicial</a>
+    </div>
+</body>
+</html>

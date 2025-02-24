@@ -1,0 +1,22 @@
+[
+    {
+        "id": "5219",
+        "username": "tiago_mariano",
+        "password": "scrypt:32768:8:1$Ksf2gepNA9YtpBvs$2d4e0053f3fe7f1bbb20a5aad0ba4204e83a843c1fcc854179c2bbd46cb8c576e613c6d049a92049cbf39ff6741f2b1ecb059f9cc5c8b436e03dc45854e688d1"
+    },
+    {
+        "id": "9459",
+        "username": "teste",
+        "password": "scrypt:32768:8:1$FTMyJLWRaxnMkNz8$12a80a142c2d288f95562fe93eeaac37269fc887def48fb7fcf73e50481b367b5baee4d785b8c84b8f115601f31a3e381974c3d38e04c1d2c8b5cf3735663cea"
+    },
+    {
+        "id": "7871",
+        "username": "tiago",
+        "password": "scrypt:32768:8:1$1d28CKMXctBbAZq6$1f4e2817e153494e42332284b54461c441b801afffb75d67125173a2a239aea7995b84139d329cfec7e8ad9edff37cb17d0d8301b3161d98a267aa40e2f11050"
+    },
+    {
+        "id": "0600",
+        "username": "TESTE_123",
+        "password": "scrypt:32768:8:1$yJt4irZuwqvXGitG$942a62636bf4ac7ad9b829ad55af28ee97ccc76f99f9be3be358a2f8f02faefaa421e25d2071f391d7f1a162607a8b86168bbb66a0b07c591bd375f4d35fd396"
+    }
+]

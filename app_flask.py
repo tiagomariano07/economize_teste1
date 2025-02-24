@@ -1,4 +1,4 @@
-from flask import Flask, render_template, request, jsonify, redirect, url_for
+from flask import Flask, render_template, request, jsonify, redirect, url_for, flash
 import json
 import os
 from pyzbar.pyzbar import decode
@@ -12,8 +12,108 @@ from selenium.webdriver.support import expected_conditions as EC
 from selenium.webdriver.common.by import By
 from bs4 import BeautifulSoup
 from urllib.parse import urlparse
+import random
+from werkzeug.security import generate_password_hash, check_password_hash
+import secrets
+from flask import session
+from passlib.hash import scrypt
 
 app = Flask(__name__)
+app.config['SECRET_KEY'] = secrets.token_hex(16)
+
+# Função para gerar ID aleatório de 4 dígitos
+def gerar_id_usuario():
+    return str(random.randint(1000, 9999))
+
+# Função para carregar dados dos usuários
+def carregar_usuarios():
+    try:
+        with open('usuarios.json', 'r') as f:
+            return json.load(f)
+    except FileNotFoundError:
+        return []
+
+# Função para salvar dados dos usuários
+def salvar_usuarios(usuarios):
+    try:
+        with open('usuarios.json', 'w') as f:
+            json.dump(usuarios, f, indent=4)
+    except Exception as e:
+        print("Erro ao salvar usuarios.json:", e)
+
+# Definir uma chave secreta
+app.config['SECRET_KEY'] = secrets.token_hex(16)  # Usando uma chave aleatória segura
+
+# Função para carregar e salvar os usuários
+def carregar_usuarios():
+    try:
+        with open('usuarios.json', 'r') as f:
+            return json.load(f)
+    except FileNotFoundError:
+        return []
+
+def salvar_usuarios(usuarios):
+    with open('usuarios.json', 'w') as f:
+        json.dump(usuarios, f, indent=4)
+
+# Função de registro de usuário
+@app.route('/registro', methods=['GET', 'POST'])
+def registro():
+    if request.method == 'POST':
+        # Coletar os dados do formulário
+        username = request.form['username']
+        password = request.form['password']
+        
+        # Verificar se o nome de usuário já existe
+        usuarios = carregar_usuarios()
+        if any(u['username'] == username for u in usuarios):  # Verifica se o nome de usuário já existe
+            flash('Este nome de usuário já está em uso!', 'error')
+            return render_template('registro.html')
+
+        # Gerar um ID aleatório de 4 dígitos
+        user_id = str(secrets.randbelow(10000)).zfill(4)  # Gera um ID de 4 dígitos
+
+        # Gerar o hash da senha
+        hashed_password = generate_password_hash(password)
+
+        # Criar um novo usuário
+        novo_usuario = {
+            'id': user_id,
+            'username': username,
+            'password': hashed_password  # Salvar o hash da senha
+        }
+
+        # Adicionar o novo usuário à lista e salvar no arquivo
+        usuarios.append(novo_usuario)
+        salvar_usuarios(usuarios)
+
+        flash('Cadastro realizado com sucesso! Faça login para acessar.', 'success')
+        return redirect(url_for('login'))
+
+    return render_template('registro.html')
+
+# Rota de login
+@app.route('/login', methods=['GET', 'POST'])
+def login():
+    if request.method == 'POST':
+        # Coletar os dados do formulário
+        username = request.form['username']
+        password = request.form['password']
+        
+        # Verificar as credenciais
+        usuarios = carregar_usuarios()
+        usuario = next((u for u in usuarios if u['username'] == username), None)
+        
+        if usuario and check_password_hash(usuario['password'], password):
+            # Se a senha for correta, o login é bem-sucedido
+            flash('Login realizado com sucesso!', 'success')
+            return redirect(url_for('index'))  # Redireciona para a página inicial
+        else:
+            # Se as credenciais estiverem erradas
+            flash('Usuário ou senha incorretos!', 'error')
+            return render_template('login.html')
+
+    return render_template('login.html')
 
 @app.route('/', methods=['GET', 'POST'])
 def index():
@@ -185,6 +285,60 @@ def reset_data():
         json.dump([], f)
 
     return redirect(url_for('pesquisa'))
+
+@app.route('/personalizado', methods=['GET'])
+def personalizado():
+    print(f"ID do usuário na sessão: {session.get('usuario_id')}")  # Adicionando o print aqui para debugar
+
+    # Verifique se o usuário está logado
+    if 'usuario_id' not in session:
+        flash('Você precisa estar logado para acessar esta página!', 'error')
+        return redirect(url_for('login'))
+
+    # Obter o ID do usuário logado da sessão
+    usuario_id = session['usuario_id']
+    
+    # Carregar os dados dos usuários do arquivo JSON
+    usuarios = carregar_usuarios()
+    
+    # Encontrar o usuário logado
+    usuario_logado = next((u for u in usuarios if u['id'] == usuario_id), None)
+    
+    if usuario_logado:
+        nome_usuario = usuario_logado['username']
+        compras = usuario_logado.get('compras', [])  # Se o campo 'compras' não existir, retorna uma lista vazia
+    else:
+        flash('Usuário não encontrado!', 'error')
+        return redirect(url_for('login'))
+
+    # Renderizar a página personalizada com os dados do usuário
+    return render_template('personalizado.html', nome_usuario=nome_usuario, compras=compras)
+
+def verificar_senha(sal, senha_hash, senha_fornecida):
+    # Comparar a senha fornecida com a armazenada utilizando o scrypt
+    return scrypt.verify(senha_fornecida, senha_hash)
+
+def login():
+    if request.method == 'POST':
+        # Coletar os dados do formulário
+        username = request.form['username']
+        password = request.form['password']
+        
+        # Verificar as credenciais
+        usuarios = carregar_usuarios()
+        usuario = next((u for u in usuarios if u['username'] == username), None)
+        
+        if usuario and verificar_senha(usuario['password'], password):
+            # Se a senha for correta, armazena o ID do usuário na sessão
+            session['usuario_id'] = usuario['id']
+            flash('Login realizado com sucesso!', 'success')
+            return redirect(url_for('personalizado'))  # Redireciona para a página personalizada
+        else:
+            # Se as credenciais estiverem erradas
+            flash('Usuário ou senha incorretos!', 'error')
+            return render_template('login.html')
+
+    return render_template('login.html')
 
 if __name__ == '__main__':
     app.run(host='0.0.0.0', port=5000, debug=True)

@@ -76,4 +76,15 @@ input[type="text"] {
 
 .resultados th {
     background-color: #f1f1f1;
+
+    
+}
+
+.bt-home {
+    max-width: 800px;
+    font-family: Arial, sans-serif;
+    margin: 10px auto;
+    padding: 20px;
+    border-radius: 120px;
+    box-shadow: 12px 4px 8px rgb(57, 168, 34);
 }
